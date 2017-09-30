@@ -73,8 +73,8 @@ int CadenceIO::gpioOpen(unsigned int gpio)
 
 void CadenceIO::run()
 {
-    struct pollfd fdset[2];
-    int nfds = 2;
+    struct pollfd fdset[1];
+    int nfds = 1;
     int gpio_fd, timeout, rc;
     char *buf[MAX_BUF];
     unsigned int gpio = 5;
@@ -87,11 +87,8 @@ void CadenceIO::run()
     while (1) {
         memset((void*)fdset, 0, sizeof(fdset));
 
-        fdset[0].fd = STDIN_FILENO;
-        fdset[0].events = POLLIN;
-
-        fdset[1].fd = gpio_fd;
-        fdset[1].events = POLLPRI;
+        fdset[0].fd = gpio_fd;
+        fdset[0].events = POLLPRI | POLLERR;
 
         rc = poll(fdset, nfds, timeout);
 
@@ -105,15 +102,14 @@ void CadenceIO::run()
             emit cadence(0.f);
         }
 
-        if (fdset[1].revents & POLLPRI) {
-            lseek(fdset[1].fd, 0, SEEK_SET);
-            len = read(fdset[1].fd, buf, MAX_BUF);
+        if (fdset[0].revents & POLLPRI) {
+            lseek(fdset[0].fd, 0, SEEK_SET);
+            len = read(fdset[0].fd, buf, MAX_BUF);
             //printf("\npoll() GPIO %d interrupt occurred\n", gpio);
 
             if (m_int.isValid() & m_int.elapsed() > 0) {
                 int elapsed = m_int.elapsed();
                 float c = (1000.f / (float)elapsed) * 60.f;
-                qDebug() << "Cadence:" << c;
                 emit cadence(c);
             }
             m_int.restart();
