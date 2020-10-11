@@ -7,7 +7,7 @@ PendulumAngle::PendulumAngle(int intervall, QObject *parent)
     : QObject(parent)
     // TODO: Move these values to some environment variable or something like that!
     , kValue(71.5101818548168f)
-    , mValue(-40.1898647f)
+    , mValue(-40.3098647f)
 {
     startTimer(intervall);
 }
