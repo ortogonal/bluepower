@@ -54,6 +54,12 @@ BLEPowerMeter::BLEPowerMeter(QObject *parent)
 
     QObject::connect(m_leController.data(), &QLowEnergyController::disconnected,
                      this, &BLEPowerMeter::reconnect);
+
+    m_boostTimer.setInterval(60 * 60 * 1000); // 60min
+    m_boostTimer.setSingleShot(true);
+    connect(&m_boostTimer, &QTimer::timeout, this, [&]() {
+        setExtraPower(0);
+    });
 }
 
 float BLEPowerMeter::cadence() const
@@ -103,6 +109,10 @@ void BLEPowerMeter::setExtraPower(const int extraPower)
     if (m_extraPower != extraPower) {
         m_extraPower = extraPower;
         emit extraPowerChanged();
+
+        if (m_extraPower != 0) {
+            m_boostTimer.start();
+        }
     }
 }
 

@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QScopedPointer>
+#include <QTimer>
+
 #include <QtBluetooth/qlowenergyservice.h>
 #include <QtBluetooth/qlowenergyadvertisingdata.h>
 #include <QtBluetooth/qlowenergyadvertisingparameters.h>
@@ -20,6 +22,7 @@ class BLEPowerMeter : public QObject
     Q_PROPERTY(float pendulumAngle READ pendulumAngle WRITE setPendulumAngle NOTIFY pendulumAngleChanged)
     Q_PROPERTY(int power READ power NOTIFY powerChanged)
     Q_PROPERTY(int extraPower READ extraPower WRITE setExtraPower NOTIFY extraPowerChanged)
+
 public:
     explicit BLEPowerMeter(QObject *parent = 0);
 
@@ -61,7 +64,7 @@ private:
     quint16 m_accumulatedCrankRevs;
     double m_crankResidue;
 
-
+    QTimer m_boostTimer;
 
 };
 
