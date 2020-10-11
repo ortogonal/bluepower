@@ -40,7 +40,13 @@
 
 #include <QCoreApplication>
 #include <QDataStream>
+#include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketServer>
 
+#include <QtWebChannel/QWebChannel>
+#include <QtWebChannel/QWebChannelAbstractTransport>
+
+#include "websocketclientwrapper.h"
 #include "pendulumangle.h"
 #include "cadenceio.h"
 #include "blepowermeter.h"
@@ -50,10 +56,28 @@ int main(int argc, char *argv[])
     //QLoggingCategory::setFilterRules(QStringLiteral("qt.bluetooth* = true"));
     QCoreApplication app(argc, argv);
 
+    QWebSocketServer server(QStringLiteral("QWebChannel Standalone Example Server"),
+                            QWebSocketServer::NonSecureMode);
+    if (!server.listen(QHostAddress::Any, 12345)) {
+        qFatal("Failed to open web socket server.");
+        return 1;
+    }
+
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    WebSocketClientWrapper clientWrapper(&server);
+
+    // setup the channel
+    QWebChannel channel;
+    QObject::connect(&clientWrapper, &WebSocketClientWrapper::clientConnected,
+                     &channel, &QWebChannel::connectTo);
+
+
     PendulumAngle pa(500);
     CadenceIO cio;
     cio.start();
     BLEPowerMeter pm;
+
+    channel.registerObject(QStringLiteral("power"), &pm);
 
     QObject::connect(&pa, &PendulumAngle::angel,
                      &pm, &BLEPowerMeter::setPendulumAngle);

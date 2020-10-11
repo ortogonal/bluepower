@@ -1,4 +1,4 @@
-QT += core bluetooth network websockets
+QT += core bluetooth network websockets webchannel
 QT -= gui
 
 CONFIG += c++11
@@ -13,7 +13,9 @@ SOURCES += main.cpp \
     adc.c \
     pendulumangle.cpp \
     cadenceio.cpp \
-    blepowermeter.cpp
+    blepowermeter.cpp \
+    websocketclientwrapper.cpp \
+    websockettransport.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -33,4 +35,6 @@ HEADERS += \
     adc.h \
     pendulumangle.h \
     cadenceio.h \
-    blepowermeter.h
+    blepowermeter.h \
+    websocketclientwrapper.h \
+    websockettransport.h

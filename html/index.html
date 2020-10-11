@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <title>Blue power</title>
+    <script type="text/javascript" src="qwebchannel.js"></script>
+<script>
+
+    'use strict';
+    var wsUri = "ws://192.168.1.27:12345";
+
+window.onload = function() {
+            var socket = new WebSocket(wsUri);
+
+            socket.onclose = function() {
+                console.error("web channel closed");
+            };
+            socket.onerror = function(error) {
+                console.error("web channel error: " + error);
+            };
+            socket.onopen = function() {
+                window.channel = new QWebChannel(socket, function(channel) {
+                    //connect to the changed signal of a property
+                    channel.objects.power.powerChanged.connect(function() {
+                        $('#power').text(channel.objects.power.power)
+                    });
+                    channel.objects.power.cadenceChanged.connect(function() {
+                        $('#cadence').text(channel.objects.power.cadence.toFixed(1))
+                    });
+                    channel.objects.power.pendulumAngleChanged.connect(function() {
+                        $('#kp').text(channel.objects.power.pendulumAngle.toFixed(2))
+                    });
+                    channel.objects.power.extraPowerChanged.connect(function() {
+                        console.log(channel.objects.power.extraPower)
+                        $('#boost').text(channel.objects.power.extraPower)
+                    });
+
+                    $('#boost a').on('click', function(){
+                        console.log($(this).text())
+                        channel.objects.power.extraPower = $(this).text()
+                    });
+
+                    $('#boost').text(channel.objects.power.extraPower)
+                });
+
+            }
+        }
+</script>
+
+  </head>
+  <body>
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="#">Blue Power</a>
+</nav>
+
+
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Power: <span id="power">0</span> W</h5>
+  </div>
+</div>
+
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Cadence: <span id="cadence">0</span> rpm</h5>
+  </div>
+</div>
+
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Kp: <span id="kp">0</span></h5>
+  </div>
+</div>
+
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Boost: <span id="boost">0</span> W</h5>
+  </div>
+</div>
+
+<div class="dropdown" id="boost">
+  <button class="btn btn-secondary btn-lg dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Boost
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="#">0</a>
+    <a class="dropdown-item" href="#">75</a>
+    <a class="dropdown-item" href="#">100</a>
+    <a class="dropdown-item" href="#">125</a>
+  </div>
+</div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+  </body>
+</html>
+

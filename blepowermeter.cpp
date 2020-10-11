@@ -56,6 +56,26 @@ BLEPowerMeter::BLEPowerMeter(QObject *parent)
                      this, &BLEPowerMeter::reconnect);
 }
 
+float BLEPowerMeter::cadence() const
+{
+    return m_cadence;
+}
+
+float BLEPowerMeter::pendulumAngle() const
+{
+    return m_angle;
+}
+
+int BLEPowerMeter::power() const
+{
+    return m_power;
+}
+
+int BLEPowerMeter::extraPower() const
+{
+    return m_extraPower;
+}
+
 void BLEPowerMeter::reconnect()
 {
     m_leController->startAdvertising(QLowEnergyAdvertisingParameters(), m_advertisingData,
@@ -64,16 +84,45 @@ void BLEPowerMeter::reconnect()
 
 void BLEPowerMeter::setCadance(const float cadence)
 {
-    m_cadence = cadence;
+    if (m_cadence != cadence) {
+        m_cadence = cadence;
+        emit cadenceChanged();
+    }
+}
+
+void BLEPowerMeter::setPower(const int power)
+{
+    if (m_power != power) {
+        m_power = power;
+        emit powerChanged();
+    }
+}
+
+void BLEPowerMeter::setExtraPower(const int extraPower)
+{
+    if (m_extraPower != extraPower) {
+        m_extraPower = extraPower;
+        emit extraPowerChanged();
+    }
 }
 
 void BLEPowerMeter::setPendulumAngle(const float angle)
 {
-    m_angle = angle;
+    if (m_angle != angle) {
+        m_angle = angle;
+        //qDebug() << Q_FUNC_INFO << m_angle;
+        emit pendulumAngleChanged();
+    }
 
-    if (1 || m_cadence > 0) {
+    if (m_cadence > 0) {
         //qDebug() << m_cadence << m_angle << m_angle * m_cadence << "         " << m_crankResidue << m_lastCrankEventTime << m_accumulatedCrankRevs;
-        quint16 power = round(m_angle * m_cadence);
+        quint16 power = round(m_angle * m_cadence) + m_extraPower;
+
+        if (power > 1000.f) {
+            power = 1000.f;
+        }
+
+        setPower(power);
 
         QByteArray value2;
         QDataStream ds(&value2, QIODevice::ReadWrite);
