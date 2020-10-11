@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include <QThread>
-#include <QTime>
+#include <QElapsedTimer>
+#include <QTimer>
 
 class CadenceIO : public QThread
 {
@@ -24,7 +25,8 @@ public slots:
 
 private:
     int fd;
-    QTime m_int;
+    QElapsedTimer m_int;
+    QTimer m_timer;
 };
 
 #endif // CADENCEIO_H

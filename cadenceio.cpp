@@ -16,6 +16,13 @@
 CadenceIO::CadenceIO(QObject *parent) : QThread(parent)
 {
     exportGpio(5);
+    m_timer.setInterval(5000);
+    m_timer.start();
+    m_timer.moveToThread(this);
+
+    connect(&m_timer, &QTimer::timeout, this, [&]() {
+        emit cadence(0);
+    });
 }
 
 void CadenceIO::exportGpio(int gpio)
@@ -107,9 +114,19 @@ void CadenceIO::run()
             len = read(fdset[0].fd, buf, MAX_BUF);
             //printf("\npoll() GPIO %d interrupt occurred\n", gpio);
 
-            if (m_int.isValid() & m_int.elapsed() > 0) {
+            // No one chan havea revulation that is below 250 ms
+            if (m_int.isValid() && m_int.elapsed() > 250) {
                 int elapsed = m_int.elapsed();
                 float c = (1000.f / (float)elapsed) * 60.f;
+
+                // Make sure we don't but out to much power
+                // For some reasone the cadence can be a bit to high
+                if (c > 175.f) {
+                    c = 175.f;
+                }
+
+                m_timer.start();
+
                 emit cadence(c);
             }
             m_int.restart();
